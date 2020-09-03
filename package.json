@@ -1,0 +1,15 @@
+{
+  "name": "forge-viewer-research",
+  "version": "1.0.0",
+  "description": "Researching CRUD and some other features of the custom objects (geometry) in the Forge Viewer (Autodesk)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "Badyanchik",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}

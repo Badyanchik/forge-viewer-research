@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Snap viewer</title>
+  <link
+          rel="stylesheet"
+          href="https://developer.api.autodesk.com/modelderivative/v2/viewers/6.*/style.min.css"
+          type="text/css"
+  />
+  <script src="https://developer.api.autodesk.com/modelderivative/v2/viewers/6.*/viewer3D.min.js"></script>
+  <link rel="stylesheet" href="./css/stylesheet.css" type="text/css" />
+
+  <script src="./js/index.js"></script>
+</head>
+<body>
+<div id="ForgeViewerDiv"></div>
+<div class="sensor-modal">
+  <div class="sensor-modal__wrapper">
+    <button class="sensor-modal__close" type="button">
+      X
+    </button>
+    <h4 class="sensor-modal__title">
+
+    </h4>
+    <p class="sensor-modal__data">
+
+    </p>
+  </div>
+</div>
+<script>
+  const divID = 'ForgeViewerDiv';
+
+  const documentId =
+          'urn:dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6dnZfcmVhY3RfZXhwcmVzc190dXRvcmlhbF8yMDA4MjcvRGVsZXRlV2FsbHMucnZ0';
+
+  const extensionArray = ['Sensors'];
+
+  const viewerApp = new Autodesk.Viewing.ViewingApplication(divID);
+  let viewer = null;
+
+  const options = {
+    env: 'AutodeskProduction',
+    useConsolidation: false,
+    getAccessToken: onGetAccessToken => {
+      const accessToken = 'eyJhbGciOiJIUzI1NiIsImtpZCI6Imp3dF9zeW1tZXRyaWNfa2V5In0.eyJzY29wZSI6WyJjb2RlOmFsbCIsImRhdGE6d3JpdGUiLCJkYXRhOnJlYWQiLCJidWNrZXQ6Y3JlYXRlIiwiYnVja2V0OmRlbGV0ZSIsImJ1Y2tldDpyZWFkIl0sImNsaWVudF9pZCI6InE2VEtLVVF4bExDRWVndFFHTWh4cFZhb3VjSFNtaFo1IiwiYXVkIjoiaHR0cHM6Ly9hdXRvZGVzay5jb20vYXVkL2p3dGV4cDYwIiwianRpIjoiam1lb3JSZ095YkYyOFFXc3plUzZLVGI4bEkxeWlMdXlOYXBJTGdjUTREU2VzUWNiS0FIb3J0NUhNZWVyT0R1RCIsImV4cCI6MTU5OTE3MzIyOH0.2ZmWI8APmP_cVKeU7_AaHQbpCSNL56QpakmxM8BIwPI';
+      const expireTimeSeconds = 3599;
+      onGetAccessToken(accessToken, expireTimeSeconds);
+    }
+  };
+
+  const config3d = {
+    extensions: extensionArray
+  };
+
+  Autodesk.Viewing.Initializer(options, function onInitialized() {
+    viewerApp.registerViewer(
+            viewerApp.k3D,
+            Autodesk.Viewing.Private.GuiViewer3D,
+            config3d
+    );
+    viewerApp.loadDocument(
+            documentId,
+            onDocumentLoadSuccess,
+            onDocumentLoadFailure
+    );
+  });
+
+  // Init after the viewer is ready
+  function onDocumentLoadSuccess() {
+    const viewables = viewerApp.bubble.search({
+      type: 'geometry'
+    });
+    if (viewables.length === 0) {
+      console.error('Document contains no viewables.');
+      return;
+    }
+    // Choose any of the available viewables
+    viewerApp.selectItem(
+            viewables[0].data,
+            onItemLoadSuccess,
+            onItemLoadFail
+    );
+  }
+
+  function onDocumentLoadFailure(viewerErrorCode) {
+    console.error('onDocumentLoadFailure() - errorCode:' + viewerErrorCode);
+  }
+
+  function onItemLoadSuccess(active_viewer, item) {
+    console.log('Document loaded successfully');
+    viewer = active_viewer;
+  }
+  function onItemLoadFail(errorCode) {
+    console.error('onItemLoadFail() - errorCode:' + errorCode);
+  }
+</script>
+</body>
+</html>
