@@ -75,9 +75,7 @@ class Sensors extends Autodesk.Viewing.Extension {
 
   unload() {
     console.log('Sensors is now unloaded!');
-
     this.viewer.toolbar.removeControl(this.subToolbar);
-
     this.viewer.toolController.deactivateTool('DemoTool');
     this.viewer.toolController.unregisterTool(this);
 
@@ -96,14 +94,13 @@ class Sensors extends Autodesk.Viewing.Extension {
   };
 
   setHitPoint(event) {
-    const screenPoint = {
-      x: event.clientX,
-      y: event.clientY
+      const screenPoint = {
+      x: event.clientX || (event.pointers[0] || {}).clientX,
+      y: event.clientY || (event.pointers[0] || {}).clientY
     };
 
-    const hitTest = this.viewer.impl.hitTest(screenPoint.x, screenPoint.y);
-
-    if (hitTest !== null) this.hitPoint = hitTest.point;
+      const hitTest = this.viewer.impl.hitTest(screenPoint.x, screenPoint.y);
+      if (hitTest !== null) this.hitPoint = hitTest.point;
   }
 
   handleMouseMove(event) {
@@ -134,7 +131,7 @@ class Sensors extends Autodesk.Viewing.Extension {
     }
 
     if (this.buttonRemoveElement.getState()) {
-      const pointer = event.pointer ? event.pointers[0] : event;
+        const pointer = (event.pointers && event.pointers.length) ? event.pointers[0] : event;
 
       const rayCaster = this.pointerToRaycaster(
         this.viewer.impl.canvas,
@@ -161,8 +158,8 @@ class Sensors extends Autodesk.Viewing.Extension {
   }
 
   handleSingleTap(event) {
-    this.setHitPoint(event)
-    return this.handleSingleClick(event)
+    this.setHitPoint(event);
+    return this.handleSingleClick(event);
   }
 
   handleButtonDown(event, button) {
@@ -344,17 +341,16 @@ class Sensors extends Autodesk.Viewing.Extension {
   }
 
   addMesh() {
-    const { x, y, z } = this.hitPoint;
+      const { x, y, z } = this.hitPoint;
     const id = this.createSensor({ x, y, z })
     this.addSensorToLocalStorage({ x, y, z, id })
   }
 
     removeElement(selections) {
-      console.log(selections);
       if (selections.length) {
       // Find root parent
       function findScene(object) {
-        if (object.parent.type !== 'Scene') {
+        if (object.parent && object.parent.type !== 'Scene') {
           return findScene(object.parent);
         } else {
           return object;
@@ -363,7 +359,6 @@ class Sensors extends Autodesk.Viewing.Extension {
 
       const sensorObj = selections[0].object;
       const sensorId = sensorObj.userData.id;
-        console.log(sensorId);
         this.removeSensorFromLocalStorage(sensorId);
       viewer.impl.scene.remove(findScene(sensorObj));
       viewer.impl.sceneUpdated(true);
